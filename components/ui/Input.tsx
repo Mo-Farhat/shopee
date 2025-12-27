@@ -30,6 +30,8 @@ export function Input({
   disabled = false,
   multiline = false,
   numberOfLines = 1,
+  autoFocus = false,
+  style,
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -44,7 +46,7 @@ export function Input({
   };
   
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, style]}>
       {label && (
         <Text style={styles.label}>{label}</Text>
       )}
@@ -81,6 +83,7 @@ export function Input({
           editable={!disabled}
           multiline={multiline}
           numberOfLines={numberOfLines}
+          autoFocus={autoFocus}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />

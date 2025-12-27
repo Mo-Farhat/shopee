@@ -35,6 +35,8 @@ export interface AuthState {
 // Shopping List Types
 // ============================================
 
+export type ListStatus = 'On Budget' | 'Tight Budget' | 'Over Budget' | 'No Budget';
+
 export interface ShoppingList {
   id: string;
   userId: string;
@@ -42,8 +44,13 @@ export interface ShoppingList {
   description?: string;
   icon: string;
   color: string;
+  category?: string;
+  status: ListStatus;
+  budget?: number;
+  spent: number;
   itemCount: number;
   completedCount: number;
+  collaborators: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -109,6 +116,8 @@ export interface InputProps {
   disabled?: boolean;
   multiline?: boolean;
   numberOfLines?: number;
+  autoFocus?: boolean;
+  style?: any;
 }
 
 export interface CheckboxProps {

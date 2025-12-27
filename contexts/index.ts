@@ -2,4 +2,7 @@
  * Contexts - Barrel Export
  */
 
-export { AuthProvider, useAuth } from './AuthContext';
+export * from './AuthContext';
+export * from './ItemsContext';
+export * from './ListsContext';
+

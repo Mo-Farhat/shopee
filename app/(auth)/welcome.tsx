@@ -11,14 +11,14 @@ import { CheckCircle, ShoppingCart, Users } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  FadeIn,
   FadeInDown,
   FadeInUp,
+  ZoomIn,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
-  withTiming,
+  withTiming
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
     illustrationY.value = withDelay(300, withSpring(0, { damping: 15 }));
     illustrationScale.value = withDelay(300, withSpring(1, { damping: 12 }));
   }, []);
-  
+
   const logoAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: logoScale.value }],
   }));
@@ -88,41 +88,18 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Header with logo */}
-        <AnimatedView style={[styles.logoContainer, logoAnimatedStyle]}>
-          <View style={styles.logoIcon}>
-            <ShoppingCart size={32} color={AppColors.primary.main} />
-          </View>
-          <Text style={styles.logoText}>Shopee</Text>
-        </AnimatedView>
-        
+       
         {/* Illustration area */}
         <AnimatedView style={[styles.illustrationContainer, illustrationAnimatedStyle]}>
           <View style={styles.illustrationWrapper}>
-            {/* Floating decorative elements */}
-            <Animated.View 
-              entering={FadeIn.delay(600).duration(500)}
-              style={[styles.floatingIcon, styles.floatingIcon1]}
-            >
-              <View style={styles.floatingIconInner}>
-                <Text style={styles.floatingEmoji}>🛒</Text>
-              </View>
-            </Animated.View>
             
-            <Animated.View 
-              entering={FadeIn.delay(800).duration(500)}
-              style={[styles.floatingIcon, styles.floatingIcon2]}
-            >
-              <View style={styles.floatingIconInner}>
-                <Text style={styles.floatingEmoji}>✨</Text>
-              </View>
-            </Animated.View>
             
             {/* Main illustration - using generated image */}
             <AnimatedImage
               source={require('@/assets/images/onboarding.png')}
               style={styles.onboardingImage}
               contentFit="contain"
-              entering={FadeIn.delay(400).duration(600)}
+              entering={ZoomIn.delay(600).duration(400)}
             />
           </View>
         </AnimatedView>
@@ -145,9 +122,9 @@ export default function WelcomeScreen() {
           
           {/* Feature pills */}
           <View style={styles.featuresRow}>
-            <FeaturePill icon={CheckCircle} text="Easy to use" delay={600} />
-            <FeaturePill icon={ShoppingCart} text="Multiple lists" delay={700} />
-            <FeaturePill icon={Users} text="Share lists" delay={800} />
+            <FeaturePill icon={ShoppingCart} text="Smart Lists" delay={600} />
+            <FeaturePill icon={CheckCircle} text="Budgeting" delay={700} />
+            <FeaturePill icon={Users} text="Collaborate" delay={800} />
           </View>
         </View>
       </View>
@@ -275,16 +252,16 @@ const styles = StyleSheet.create({
   featurePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: 4,
     backgroundColor: AppColors.background.tertiary,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     borderColor: AppColors.border.default,
   },
   featurePillText: {
-    fontSize: Typography.size.sm,
+    fontSize: 12,
     color: AppColors.text.secondary,
   },
   buttonsContainer: {

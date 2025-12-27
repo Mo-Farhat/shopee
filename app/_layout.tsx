@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { AuthProvider } from '@/contexts';
+import { AuthProvider, ItemsProvider, ListsProvider } from '@/contexts';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
@@ -29,14 +29,45 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? ShopeeTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="light" />
-      </ThemeProvider>
+      <ListsProvider>
+        <ItemsProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? ShopeeTheme : DefaultTheme}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: 'fade',
+                animationDuration: 200,
+                contentStyle: { backgroundColor: ShopeeTheme.colors.background },
+                gestureEnabled: true,
+                gestureDirection: 'horizontal',
+                fullScreenGestureEnabled: true,
+              }}
+            >
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen 
+                name="list/[id]" 
+                options={{ 
+                  animation: 'slide_from_right',
+                  animationDuration: 250,
+                  gestureEnabled: true,
+                  gestureDirection: 'horizontal',
+                  fullScreenGestureEnabled: true,
+                }} 
+              />
+              <Stack.Screen 
+                name="modal" 
+                options={{ 
+                  presentation: 'modal', 
+                  title: 'Modal',
+                  animation: 'fade_from_bottom',
+                }} 
+              />
+            </Stack>
+            <StatusBar style="light" />
+          </ThemeProvider>
+        </ItemsProvider>
+      </ListsProvider>
     </AuthProvider>
   );
 }
