@@ -26,7 +26,7 @@ interface ItemsContextType {
   error: string | null;
   activeListId: string | null;
   setActiveListId: (id: string | null) => void;
-  addItem: (name: string, quantity?: number, unit?: string, category?: string) => Promise<string>;
+  addItem: (name: string, quantity?: number, unit?: string, category?: string, price?: number) => Promise<string>;
   updateItem: (id: string, updates: Partial<ListItem>) => Promise<void>;
   toggleItem: (id: string, isCompleted: boolean) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
@@ -85,20 +85,37 @@ export function ItemsProvider({ children }: { children: React.ReactNode }) {
   const updateListCounts = useCallback(async (listId: string, itemsList: ListItem[]) => {
     const itemCount = itemsList.length;
     const completedCount = itemsList.filter(item => item.isCompleted).length;
+    // Calculate total spent from item prices
+    const spent = itemsList.reduce((total, item) => {
+      const itemPrice = item.price || 0;
+      const itemQty = item.quantity || 1;
+      return total + (itemPrice * itemQty);
+    }, 0);
+    
+    // Determine budget status
+    const currentList = lists.find(l => l.id === listId);
+    let status: 'On Budget' | 'Tight Budget' | 'Over Budget' | 'No Budget' = 'No Budget';
+    if (currentList?.budget && currentList.budget > 0) {
+      const ratio = spent / currentList.budget;
+      if (ratio > 1) status = 'Over Budget';
+      else if (ratio > 0.8) status = 'Tight Budget';
+      else status = 'On Budget';
+    }
     
     try {
-      await updateList(listId, { itemCount, completedCount });
+      await updateList(listId, { itemCount, completedCount, spent, status });
     } catch (err) {
       console.error('Failed to update list counts:', err);
     }
-  }, [updateList]);
+  }, [updateList, lists]);
 
   // Add item
   const addItem = useCallback(async (
     name: string, 
     quantity?: number, 
     unit?: string, 
-    category?: string
+    category?: string,
+    price?: number
   ) => {
     if (!activeListId) throw new Error('No active list selected');
 
@@ -115,6 +132,7 @@ export function ItemsProvider({ children }: { children: React.ReactNode }) {
       if (quantity !== undefined) newItem.quantity = quantity;
       if (unit) newItem.unit = unit;
       if (category) newItem.category = category;
+      if (price !== undefined) newItem.price = price;
 
       const docRef = await addDoc(collection(db, 'listItems'), newItem);
       
