@@ -11,14 +11,14 @@ import { router } from 'expo-router';
 import { ArrowLeft, Lock, Mail } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -124,25 +124,19 @@ export default function LoginScreen() {
               error={errors.password}
             />
             
-            <View style={styles.optionsRow}>
-              <Checkbox
-                checked={rememberMe}
-                onChange={setRememberMe}
-                label="Remember me"
-                size="sm"
-              />
-              
-              <TouchableOpacity onPress={handleForgotPassword}>
-                <Text style={styles.forgotText}>Forgot password?</Text>
-              </TouchableOpacity>
-            </View>
+            <Checkbox
+              checked={rememberMe}
+              onChange={setRememberMe}
+              label="Remember me"
+              size="sm"
+            />
             
             {error && (
               <Text style={styles.errorText}>{error}</Text>
             )}
             
             <Button
-              title="Log In"
+              title="Login"
               variant="primary"
               size="lg"
               fullWidth
@@ -165,17 +159,28 @@ export default function LoginScreen() {
             <SocialButtons />
           </Animated.View>
           
-          {/* Sign up link */}
+          {/* Footer links */}
           <Animated.View 
             entering={FadeInUp.delay(400).springify()}
-            style={styles.footer}
+            style={styles.footerContainer}
           >
-            <Text style={styles.footerText}>
-              Don't have an account?{' '}
-            </Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
-              <Text style={styles.footerLink}>Sign Up</Text>
-            </TouchableOpacity>
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>
+                Don't have an account?{' '}
+              </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
+                <Text style={styles.footerLink}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>
+                Forgot password?{' '}
+              </Text>
+              <TouchableOpacity onPress={handleForgotPassword}>
+                <Text style={styles.footerLink}>Reset</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -221,10 +226,9 @@ const styles = StyleSheet.create({
   form: {
     gap: Spacing.lg,
   },
-  optionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  forgotContainer: {
     alignItems: 'center',
+    paddingBottom: Spacing['2xl'],
   },
   forgotText: {
     fontSize: Typography.size.sm,
@@ -254,11 +258,14 @@ const styles = StyleSheet.create({
     fontSize: Typography.size.sm,
     color: AppColors.text.muted,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  footerContainer: {
     alignItems: 'center',
     paddingVertical: Spacing['3xl'],
+    gap: Spacing.xs,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   footerText: {
     fontSize: Typography.size.base,

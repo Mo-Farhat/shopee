@@ -63,6 +63,7 @@ export interface ListItem {
   unit?: string;
   category?: string;
   note?: string;
+  price?: number;
   isCompleted: boolean;
   createdAt: Timestamp;
   completedAt?: Timestamp;
