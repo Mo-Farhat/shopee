@@ -146,7 +146,8 @@ export default function ListDetailScreen() {
   const progress = list.itemCount > 0 ? (list.completedCount / list.itemCount) * 100 : 0;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.screenContainer}>
+      <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -235,10 +236,15 @@ export default function ListDetailScreen() {
         />
       )}
     </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: AppColors.background.primary,
+  },
   container: {
     flex: 1,
     backgroundColor: AppColors.background.primary,

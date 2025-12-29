@@ -1,112 +1,214 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+/**
+ * Finance Tab Screen
+ * Displays budget overview and per-list spending analytics
+ */
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { FinanceSummary, ListBudgetCard } from '@/components/finance';
+import { AppColors, BorderRadius, Spacing, Typography } from '@/constants/theme';
+import { useLists } from '@/contexts';
+import { router } from 'expo-router';
+import { Calendar, DollarSign } from 'lucide-react-native';
+import React, { useMemo, useState } from 'react';
+import {
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function TabTwoScreen() {
+type TimeFilter = 'today' | 'week' | 'month';
+
+const TIME_FILTERS: { key: TimeFilter; label: string }[] = [
+  { key: 'today', label: 'Today' },
+  { key: 'week', label: 'This Week' },
+  { key: 'month', label: 'This Month' },
+];
+
+export default function FinanceScreen() {
+  const { lists, isLoading } = useLists();
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('month');
+  
+  // Sort lists by spent (highest first)
+  const sortedLists = useMemo(() => {
+    return [...lists].sort((a, b) => (b.spent || 0) - (a.spent || 0));
+  }, [lists]);
+
+  const handleListPress = (listId: string) => {
+    router.push(`/list/${listId}`);
+  };
+
+  const renderListCard = ({ item, index }: { item: typeof lists[0]; index: number }) => (
+    <Animated.View entering={FadeInDown.delay(200 + index * 50).springify()}>
+      <ListBudgetCard
+        list={item}
+        onPress={() => handleListPress(item.id)}
+      />
+    </Animated.View>
+  );
+
+  const ListHeader = () => (
+    <>
+      {/* Header */}
+      <Animated.View 
+        entering={FadeInDown.delay(50).springify()}
+        style={styles.header}
+      >
+        <View style={styles.headerLeft}>
+          <DollarSign size={28} color={AppColors.primary.main} />
+          <Text style={styles.title}>Finance</Text>
+        </View>
+      </Animated.View>
+      
+      {/* Time Filter */}
+      <Animated.View 
+        entering={FadeInDown.delay(100).springify()}
+        style={styles.filterContainer}
+      >
+        {TIME_FILTERS.map((filter) => (
+          <TouchableOpacity
+            key={filter.key}
+            style={[
+              styles.filterButton,
+              timeFilter === filter.key && styles.filterButtonActive,
+            ]}
+            onPress={() => setTimeFilter(filter.key)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                timeFilter === filter.key && styles.filterTextActive,
+              ]}
+            >
+              {filter.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </Animated.View>
+      
+      {/* Summary Card */}
+      <FinanceSummary timeFilter={timeFilter} />
+      
+      {/* Lists Section Header */}
+      <Animated.View 
+        entering={FadeInDown.delay(150).springify()}
+        style={styles.sectionHeader}
+      >
+        <Text style={styles.sectionTitle}>Spending by List</Text>
+        <Text style={styles.sectionSubtitle}>
+          {sortedLists.length} {sortedLists.length === 1 ? 'list' : 'lists'}
+        </Text>
+      </Animated.View>
+    </>
+  );
+
+  const EmptyState = () => (
+    <View style={styles.emptyState}>
+      <Calendar size={48} color={AppColors.text.muted} />
+      <Text style={styles.emptyTitle}>No spending data yet</Text>
+      <Text style={styles.emptySubtitle}>
+        Add items with prices to your shopping lists to see spending analytics
+      </Text>
+    </View>
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <FlatList
+        data={sortedLists}
+        renderItem={renderListCard}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={!isLoading ? EmptyState : null}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: AppColors.background.primary,
   },
-  titleContainer: {
+  listContent: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing['3xl'],
+  },
+  header: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  title: {
+    fontSize: Typography.size['2xl'],
+    fontWeight: Typography.weight.bold,
+    color: AppColors.text.primary,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
+  },
+  filterButton: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    backgroundColor: AppColors.background.secondary,
+    borderWidth: 1,
+    borderColor: AppColors.border.default,
+  },
+  filterButtonActive: {
+    backgroundColor: AppColors.primary.main,
+    borderColor: AppColors.primary.main,
+  },
+  filterText: {
+    fontSize: Typography.size.sm,
+    color: AppColors.text.secondary,
+    fontWeight: Typography.weight.medium,
+  },
+  filterTextActive: {
+    color: AppColors.primary.contrast,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: Typography.size.lg,
+    fontWeight: Typography.weight.semibold,
+    color: AppColors.text.primary,
+  },
+  sectionSubtitle: {
+    fontSize: Typography.size.sm,
+    color: AppColors.text.muted,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: Spacing['4xl'],
+  },
+  emptyTitle: {
+    fontSize: Typography.size.lg,
+    fontWeight: Typography.weight.semibold,
+    color: AppColors.text.primary,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  emptySubtitle: {
+    fontSize: Typography.size.sm,
+    color: AppColors.text.muted,
+    textAlign: 'center',
+    paddingHorizontal: Spacing['2xl'],
   },
 });
